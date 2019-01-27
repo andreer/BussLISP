@@ -1,20 +1,15 @@
 public class Cons {
-    Object car;
-    Object cdr;
+    Object car, cdr;
 
-    public Cons() {
-    }
+    Cons() {}
 
-    public Cons(Object car, Object cdr) {
-
+    Cons(Object car, Object cdr) {
         this.car = car;
         this.cdr = cdr;
     }
 
-    public void printRest(StringBuilder sb) {
-
+    private void printRest(StringBuilder sb) {
         sb.append(car);
-
         if (cdr == null) {
             sb.append(")");
         } else if (cdr instanceof Cons) {
@@ -29,9 +24,7 @@ public class Cons {
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder("(");
-
+        var sb = new StringBuilder("(");
         printRest(sb);
         return sb.toString();
     }

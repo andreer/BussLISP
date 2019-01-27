@@ -1,16 +1,15 @@
-public class SchemeProcedure extends Procedure {
-    Cons args;
-    Environment env;
-    Cons body;
+public class SchemeProcedure implements Procedure {
+    private Cons args;
+    private Environment env;
+    private Cons body;
 
-    public SchemeProcedure(Cons argNames, Cons body, Environment env) {
+    SchemeProcedure(Cons argNames, Cons body, Environment env) {
         this.args = argNames;
         this.env = env;
         this.body = body;
     }
 
-    @Override
-    Object apply(Cons arguments) {
+    public Object apply(Cons arguments) {
         Environment applicationEnvironment = new Environment();
         applicationEnvironment.parent = env;
 

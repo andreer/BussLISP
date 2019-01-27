@@ -1,147 +1,36 @@
 import java.math.BigInteger;
 
-public abstract class Procedure {
-    abstract Object apply(Cons arguments);
+public interface Procedure {
+    Object apply(Cons arguments);
 
-    public static final Procedure CAR = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            Object firstArgument = arguments.car;
-            if (firstArgument instanceof Cons) {
-                return ((Cons) firstArgument).car;
-            } else {
-                throw new RuntimeException();
-            }
-        }
-    };
+    Procedure CAR = arguments -> ((Cons) arguments.car).car;
 
-    public static final Procedure CDR = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            Object firstArgument = arguments.car;
-            if (firstArgument instanceof Cons) {
-                return ((Cons) firstArgument).cdr;
-            } else {
-                throw new RuntimeException();
-            }
-        }
-    };
+    Procedure CDR = arguments -> ((Cons) arguments.car).cdr;
 
-    public static final Procedure CONS = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            Object firstArgument = arguments.car;
-            Object secondArgument = ((Cons) arguments.cdr).car;
+    Procedure CONS = arguments -> new Cons(arguments.car, ((Cons) arguments.cdr).car);
 
-            return new Cons(firstArgument, secondArgument);
-        }
-    };
+    Procedure NULL = arguments -> arguments.car == null ? new Token(Token.Type.SYMBOL, "t") : null;
 
-    public static final Procedure NULL = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            Object firstArgument = arguments.car;
-            if (firstArgument == null)
-                return new Token(Token.Type.SYMBOL, "t");
-            else
-                return null;
-        }
-    };
+    Procedure ATOM = arguments -> arguments.car instanceof Cons ? null : new Token(Token.Type.SYMBOL, "t");
 
-    public static final Procedure ATOM = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            Object firstArgument = arguments.car;
-            if (firstArgument instanceof Cons)
-                return null;
-            else
-                return new Token(Token.Type.SYMBOL, "t");
-        }
-    };
+    Procedure EQ = arguments -> arguments.car.equals(((Cons) arguments.cdr).car) ? new Token(Token.Type.SYMBOL, "t") : null;
 
-    public static final Procedure EQ = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            Object firstArgument = arguments.car;
-            Object secondArgument = ((Cons) arguments.cdr).car;
+    Procedure PLUS = arguments -> ((BigInteger) arguments.car).add((BigInteger) ((Cons) arguments.cdr).car);
 
-            if (firstArgument.equals(secondArgument)) {
-                return new Token(Token.Type.SYMBOL, "t");
-            } else {
-                return null;
-            }
-        }
-    };
+    Procedure MINUS = arguments -> ((BigInteger) arguments.car).subtract((BigInteger) ((Cons) arguments.cdr).car);
 
-    public static final Procedure PLUS = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            BigInteger firstArgument = (BigInteger) arguments.car;
-            BigInteger secondArgument = (BigInteger) ((Cons) arguments.cdr).car;
+    Procedure LT = arguments -> compareTo(arguments) < 0 ? new Token(Token.Type.SYMBOL, "t") : null;
 
-            return firstArgument.add(secondArgument);
-        }
-    };
+    Procedure GT = arguments -> compareTo(arguments) > 0 ? new Token(Token.Type.SYMBOL, "t") : null;
 
-    public static final Procedure MINUS = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            BigInteger firstArgument = (BigInteger) arguments.car;
-            BigInteger secondArgument = (BigInteger) ((Cons) arguments.cdr).car;
+    static int compareTo(Cons arguments) { return ((BigInteger) arguments.car).compareTo((BigInteger) ((Cons) arguments.cdr).car); }
 
-            return firstArgument.subtract(secondArgument);
-        }
-    };
-
-    public static final Procedure LT = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            BigInteger firstArgument = (BigInteger) arguments.car;
-            BigInteger secondArgument = (BigInteger) ((Cons) arguments.cdr).car;
-
-            return firstArgument.compareTo(secondArgument) < 0 ? new Token(Token.Type.SYMBOL, "t") : null;
-        }
-    };
-
-    public static final Procedure GT = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            BigInteger firstArgument = (BigInteger) arguments.car;
-            BigInteger secondArgument = (BigInteger) ((Cons) arguments.cdr).car;
-
-            return firstArgument.compareTo(secondArgument) > 0 ? new Token(Token.Type.SYMBOL, "t") : null;
-        }
-    };
 
     // Remaining procedures are only used for lookup, implementation is in eval for now
-
-    public static final Procedure QUOTE = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            return null;
-        }
-    };
-
-    public static final Procedure COND = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            return null;
-        }
-    };
-
-    public static final Procedure LAMBDA = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            return null;
-        }
-    };
-
-    public static final Procedure DEFINE = new Procedure() {
-        @Override
-        Object apply(Cons arguments) {
-            return null;
-        }
-    };
+    Procedure QUOTE = arguments -> null;
+    Procedure COND = arguments -> null;
+    Procedure LAMBDA = arguments -> null;
+    Procedure DEFINE = arguments -> null;
 
 
 }

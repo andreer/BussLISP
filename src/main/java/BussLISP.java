@@ -27,36 +27,35 @@ public class BussLISP {
 
     public static void main(String[] args) {
 
-        Scanner s = new Scanner(System.in);
+        var s = new Scanner(System.in);
 
-        Environment e = getRootEnvironment();
         main:
         while (true) {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             while (s.hasNextLine()) {
-                String line = s.nextLine();
+                var line = s.nextLine();
                 if (line.equals(""))
                     break;
                 sb.append(line);
             }
 
-            List<String> lexemes = scan(sb.toString());
-//        System.out.println(lexemes);
+            var lexemes = scan(sb.toString());
+//            System.out.println(lexemes);
 
-            Deque<Token> tokens = tokenize(lexemes);
-//        System.out.println(tokens);
+            var tokens = tokenize(lexemes);
+//            System.out.println(tokens);
 
-            Cons parse = parse(tokens);
-//        System.out.println(parse);
+            var parse = parse(tokens);
+//            System.out.println(parse);
 
 
             while (true) {
-                Object head = parse.car;
+                var head = parse.car;
 
                 if (head == null) break main;
 
-                Object eval = eval(head, rootEnvironment);
-                String output = String.valueOf(eval);
+                var eval = eval(head, rootEnvironment);
+                var output = String.valueOf(eval);
                 System.out.println(output);
 
                 if (parse.cdr == null) {
@@ -65,10 +64,6 @@ public class BussLISP {
                 parse = (Cons) parse.cdr;
             }
         }
-    }
-
-    static Environment getRootEnvironment() {
-        return rootEnvironment;
     }
 
     static Object eval(Object v, Environment e) {
@@ -80,8 +75,11 @@ public class BussLISP {
                     return ((Token) v).value;
             }
         } else if (v instanceof Cons) {
-            Cons cons = (Cons) v;
-            Procedure p = (Procedure) eval(cons.car, e);
+            var cons = (Cons) v;
+            var p = (Procedure) eval(cons.car, e);
+            if (p == null) {
+                throw new NullPointerException("Undefined procedure " + cons.car);
+            }
             if (p.equals(Procedure.QUOTE)) {
                 return ((Cons) cons.cdr).car;
             } else if (p.equals(Procedure.COND)) {
@@ -91,14 +89,14 @@ public class BussLISP {
             } else if (p.equals(Procedure.DEFINE)) {
                 return evalDefine((Cons) cons.cdr, e);
             } else {
-                Cons args = (Cons) cons.cdr;
-                Cons evaluatedArgs = new Cons();
-                Cons evArgsHead = evaluatedArgs;
+                var args = (Cons) cons.cdr;
+                var evaluatedArgs = new Cons();
+                var evArgsHead = evaluatedArgs;
                 while (args != null) {
                     evArgsHead.car = eval(args.car, e);
                     args = (Cons) args.cdr;
                     if (args == null) break;
-                    Cons next = new Cons();
+                    var next = new Cons();
                     evArgsHead.cdr = next;
                     evArgsHead = next;
                 }
@@ -111,39 +109,38 @@ public class BussLISP {
     }
 
     private static Object evalDefine(Cons cons, Environment e) {
-        Object arg = eval(((Cons) cons.cdr).car, e);
+        var arg = eval(((Cons) cons.cdr).car, e);
         e.bindings.put((Token) cons.car, arg);
         return arg;
     }
 
     private static Object evalLambda(Cons cons, Environment e) {
-        return new SchemeProcedure((Cons) cons.car, (Cons) ((Cons)cons.cdr).car, e);
+        return new SchemeProcedure((Cons) cons.car, (Cons) ((Cons) cons.cdr).car, e);
     }
 
     private static Object evalCond(Cons cons, Environment e) {
-        Cons args = (Cons) cons.cdr;
-        Object ans = null;
+        var args = (Cons) cons.cdr;
         while (args != null) {
-            Cons clause = (Cons) args.car;
-            Object testForm = clause.car;
-            Object form = ((Cons) clause.cdr).car;
-            Object result = eval(testForm, e);
+            var clause = (Cons) args.car;
+            var testForm = clause.car;
+            var form = ((Cons) clause.cdr).car;
+            var result = eval(testForm, e);
             if (result != null) {
                 return eval(form, e);
             }
             args = (Cons) args.cdr;
         }
-        return ans;
+        return null;
     }
 
-    static LinkedList<String> scan(String s) {
+    private static LinkedList<String> scan(String s) {
         s = s.trim();
 
         if (s.isEmpty()) {
-            return new LinkedList<String>();
+            return new LinkedList<>();
         } else if (s.charAt(0) == '(' || s.charAt(0) == ')') {
-            String symbol = String.valueOf(s.charAt(0));
-            LinkedList<String> rest = scan(s.substring(1, s.length()));
+            var symbol = String.valueOf(s.charAt(0));
+            var rest = scan(s.substring(1));
 
             rest.addFirst(symbol);
             return rest;
@@ -158,24 +155,24 @@ public class BussLISP {
                 }
             }
 
-            String symbol = s.substring(0, last);
-            LinkedList<String> rest = scan(s.substring(last, s.length()));
+            var symbol = s.substring(0, last);
+            var rest = scan(s.substring(last));
 
             rest.addFirst(symbol);
             return rest;
         }
     }
 
-    static Deque<Token> tokenize(List<String> lexemes) {
-        LinkedList<Token> tokens = new LinkedList<Token>();
+    private static Deque<Token> tokenize(List<String> lexemes) {
+        var tokens = new LinkedList<Token>();
 
-        for (String l : lexemes) {
-            Token t = new Token();
+        for (var l : lexemes) {
+            var t = new Token();
             if ("(".equals(l)) {
                 t.type = Token.Type.OPEN_PAREN;
             } else if (")".equals(l)) {
                 t.type = Token.Type.CLOSE_PAREN;
-            } else if (l.matches("[0-9]+")) {
+            } else if (l.matches("-?[0-9]+")) {
                 t.type = Token.Type.NUMBER;
                 t.value = new BigInteger(l);
             } else {
@@ -188,17 +185,17 @@ public class BussLISP {
         return tokens;
     }
 
-    static Cons parse(Deque<Token> tokens) {
-        Cons head = new Cons();
-        Cons cur = head;
+    private static Cons parse(Deque<Token> tokens) {
+        var head = new Cons();
+        var cur = head;
 
         while (!tokens.isEmpty()) {
-            Token t = tokens.removeFirst();
+            var t = tokens.removeFirst();
             switch (t.type) {
                 case SYMBOL:
                 case NUMBER:
                     if (cur.car != null) {
-                        Cons next = new Cons();
+                        var next = new Cons();
                         cur.cdr = next;
                         cur = next;
                     }
@@ -206,7 +203,7 @@ public class BussLISP {
                     break;
                 case OPEN_PAREN:
                     if (cur.car != null) {
-                        Cons next = new Cons();
+                        var next = new Cons();
                         cur.cdr = next;
                         cur = next;
                     }
