@@ -8,26 +8,44 @@ class BussLISPTest {
     void testCountChange() {
         String s =
                 "(define count-change (lambda (amount)\n" +
-                "  (cc amount 5)))\n" +
-                "(define first-denomination (lambda (kinds-of-coins)\n" +
-                "  (cond ((eq kinds-of-coins 1) 1)\n" +
-                "        ((eq kinds-of-coins 2) 5)\n" +
-                "        ((eq kinds-of-coins 3) 10)\n" +
-                "        ((eq kinds-of-coins 4) 25)\n" +
-                "        ((eq kinds-of-coins 5) 50))))\n" +
-                "(define cc (lambda (amount kinds-of-coins)\n" +
-                "  (cond ((eq amount 0) 1)\n" +
-                "        ((or (< amount 0) (eq kinds-of-coins 0)) 0)\n" +
-                "        ((quote t) (+ (cc amount\n" +
-                "                     (- kinds-of-coins 1))\n" +
-                "                 (cc (- amount\n" +
-                "                        (first-denomination kinds-of-coins))\n" +
-                "                     kinds-of-coins))))))\n" +
-                "\n" +
-                "(define or (lambda (a b)\n" +
-                "             (cond ((null a) b)\n" +
-                "                   ((quote t) a))))\n" +
-                "(count-change 100)\n";
+                        "  (cc amount 5)))\n" +
+                        "(define first-denomination (lambda (kinds-of-coins)\n" +
+                        "  (cond ((eq kinds-of-coins 1) 1)\n" +
+                        "        ((eq kinds-of-coins 2) 5)\n" +
+                        "        ((eq kinds-of-coins 3) 10)\n" +
+                        "        ((eq kinds-of-coins 4) 25)\n" +
+                        "        ((eq kinds-of-coins 5) 50))))\n" +
+                        "(define cc (lambda (amount kinds-of-coins)\n" +
+                        "  (cond ((eq amount 0) 1)\n" +
+                        "        ((or (< amount 0) (eq kinds-of-coins 0)) 0)\n" +
+                        "        ((quote t) (+ (cc amount\n" +
+                        "                     (- kinds-of-coins 1))\n" +
+                        "                 (cc (- amount\n" +
+                        "                        (first-denomination kinds-of-coins))\n" +
+                        "                     kinds-of-coins))))))\n" +
+                        "\n" +
+                        "(define or (lambda (a b)\n" +
+                        "             (cond ((null a) b)\n" +
+                        "                   ((quote t) a))))\n" +
+                        "(count-change 100)\n";
+
+        System.setIn(new ByteArrayInputStream(s.getBytes()));
+        BussLISP.main(null);
+    }
+
+    @Test
+    void testTak() {
+        String s =
+                "(define not (lambda (x)\n" +
+                        "              (cond (x nil)\n" +
+                        "                    ((quote t) (quote t)))))\n" +
+                        "(define tak (lambda (x y z)\n" +
+                        "              (cond ((not (< y x)) z)\n" +
+                        "                    ((quote t) (tak\n" +
+                        "                                (tak (- x 1) y z)\n" +
+                        "                                (tak (- y 1) z x)\n" +
+                        "                                (tak (- z 1) x y))))))\n" +
+                        "(tak 18 12 4)";
 
         System.setIn(new ByteArrayInputStream(s.getBytes()));
         BussLISP.main(null);
