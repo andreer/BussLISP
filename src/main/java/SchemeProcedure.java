@@ -1,7 +1,7 @@
 public class SchemeProcedure implements Procedure {
-    private Cons args;
-    private Environment env;
-    private Cons body;
+    private final Cons args;
+    private final Environment env;
+    private final Cons body;
 
     SchemeProcedure(Cons argNames, Cons body, Environment env) {
         this.args = argNames;

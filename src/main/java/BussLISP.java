@@ -1,11 +1,11 @@
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
 public class BussLISP {
-    private static Environment rootEnvironment;
+    private static final Environment rootEnvironment;
 
     static {
         rootEnvironment = new Environment();
@@ -21,6 +21,8 @@ public class BussLISP {
         rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, "define"), Procedure.DEFINE);
         rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, "+"), Procedure.PLUS);
         rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, "-"), Procedure.MINUS);
+        rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, "*"), Procedure.MUL);
+        rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, "/"), Procedure.DIV);
         rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, "<"), Procedure.LT);
         rootEnvironment.bindings.put(new Token(Token.Type.SYMBOL, ">"), Procedure.GT);
     }
@@ -34,8 +36,8 @@ public class BussLISP {
             var sb = new StringBuilder();
             while (s.hasNextLine()) {
                 var line = s.nextLine();
-                if (line.equals(""))
-                    break;
+                if (line.stripLeading().startsWith(";"))
+                    continue;
                 sb.append(line);
             }
 
@@ -57,6 +59,7 @@ public class BussLISP {
                 var eval = eval(head, rootEnvironment);
                 var output = String.valueOf(eval);
                 System.out.println(output);
+                System.out.flush();
 
                 if (parse.cdr == null) {
                     break;
@@ -109,6 +112,7 @@ public class BussLISP {
     }
 
     private static Object evalDefine(Cons cons, Environment e) {
+        System.err.println("Defining " + cons.car);
         var arg = eval(((Cons) cons.cdr).car, e);
         e.bindings.put((Token) cons.car, arg);
         return arg;
@@ -172,9 +176,9 @@ public class BussLISP {
                 t.type = Token.Type.OPEN_PAREN;
             } else if (")".equals(l)) {
                 t.type = Token.Type.CLOSE_PAREN;
-            } else if (l.matches("-?[0-9]+")) {
+            } else if (l.matches("-?[0-9]+(\\.[0-9]+)?")) {
                 t.type = Token.Type.NUMBER;
-                t.value = new BigInteger(l);
+                t.value = new BigDecimal(l);
             } else {
                 t.type = Token.Type.SYMBOL;
                 t.value = l;

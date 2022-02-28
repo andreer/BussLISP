@@ -1,4 +1,5 @@
-import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 public interface Procedure {
     Object apply(Cons arguments);
@@ -15,22 +16,24 @@ public interface Procedure {
 
     Procedure EQ = arguments -> arguments.car.equals(((Cons) arguments.cdr).car) ? new Token(Token.Type.SYMBOL, "t") : null;
 
-    Procedure PLUS = arguments -> ((BigInteger) arguments.car).add((BigInteger) ((Cons) arguments.cdr).car);
+    Procedure PLUS = arguments -> ((BigDecimal) arguments.car).add((BigDecimal) ((Cons) arguments.cdr).car);
 
-    Procedure MINUS = arguments -> ((BigInteger) arguments.car).subtract((BigInteger) ((Cons) arguments.cdr).car);
+    Procedure MINUS = arguments -> ((BigDecimal) arguments.car).subtract((BigDecimal) ((Cons) arguments.cdr).car);
+
+    Procedure DIV = arguments -> ((BigDecimal) arguments.car).divide((BigDecimal) ((Cons) arguments.cdr).car, MathContext.DECIMAL128);
+
+    Procedure MUL = arguments -> ((BigDecimal) arguments.car).multiply((BigDecimal) ((Cons) arguments.cdr).car, MathContext.DECIMAL128);
 
     Procedure LT = arguments -> compareTo(arguments) < 0 ? new Token(Token.Type.SYMBOL, "t") : null;
 
     Procedure GT = arguments -> compareTo(arguments) > 0 ? new Token(Token.Type.SYMBOL, "t") : null;
 
-    static int compareTo(Cons arguments) { return ((BigInteger) arguments.car).compareTo((BigInteger) ((Cons) arguments.cdr).car); }
-
+    static int compareTo(Cons arguments) { return ((BigDecimal) arguments.car).compareTo((BigDecimal) ((Cons) arguments.cdr).car); }
 
     // Remaining procedures are only used for lookup, implementation is in eval for now
     Procedure QUOTE = arguments -> null;
     Procedure COND = arguments -> null;
     Procedure LAMBDA = arguments -> null;
     Procedure DEFINE = arguments -> null;
-
 
 }
